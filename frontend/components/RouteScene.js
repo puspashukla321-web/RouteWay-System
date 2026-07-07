@@ -17,9 +17,9 @@ export default function RouteScene() {
           <div className="scene-lane scene-lane-bottom" />
 
           <div className="scene-vehicle scene-vehicle-bus bus-a">
-            <span className="vehicle-window" />
-            <span className="vehicle-window" />
-            <span className="vehicle-window" />
+            <span className="vehicle-window vehicle-window-bus" />
+            <span className="vehicle-window vehicle-window-bus" />
+            <span className="vehicle-window vehicle-window-bus" />
           </div>
 
           <div className="scene-vehicle scene-vehicle-car car-a">

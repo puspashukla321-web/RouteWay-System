@@ -32,6 +32,18 @@ export default function HomePage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    if (!resultsOpen) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [resultsOpen]);
+
   async function handleSearch(e) {
     e.preventDefault();
     setError("");
@@ -206,7 +218,11 @@ export default function HomePage() {
       </section>
 
       {resultsOpen && results && (
-        <div className="results-modal-backdrop" onClick={closeResults} role="presentation">
+        <div
+          className="results-modal-backdrop"
+          onClick={closeResults}
+          role="presentation"
+        >
           <div
             className="results-modal"
             role="dialog"
@@ -226,7 +242,12 @@ export default function HomePage() {
                     : "No direct route found. Try different stops or check back later."}
                 </p>
               </div>
-              <button className="results-modal-close" type="button" onClick={closeResults} aria-label="Close results modal">
+              <button
+                className="results-modal-close"
+                type="button"
+                onClick={closeResults}
+                aria-label="Close results modal"
+              >
                 ×
               </button>
             </div>
@@ -234,11 +255,13 @@ export default function HomePage() {
             <div className="results-modal-body">
               {results.length === 0 ? (
                 <div className="results-empty results-empty-modal">
-                  No direct route found from {from} to {to} yet. Try different stops, or check back
-                  once an admin adds it.
+                  No direct route found from {from} to {to} yet. Try different
+                  stops, or check back once an admin adds it.
                 </div>
               ) : (
-                results.map((r) => <RouteCard key={r.routeId} route={r} from={from} to={to} />)
+                results.map((r) => (
+                  <RouteCard key={r.routeId} route={r} from={from} to={to} />
+                ))
               )}
             </div>
           </div>
