@@ -57,6 +57,9 @@ CREATE TABLE IF NOT EXISTS fares (
 -- User-submitted feedback (e.g. "this fare is outdated")
 CREATE TABLE IF NOT EXISTS feedback (
   id INT AUTO_INCREMENT PRIMARY KEY,
+  user_name VARCHAR(100) NOT NULL,
+  user_email VARCHAR(150) NOT NULL,
+  user_contact VARCHAR(20) NULL,
   route_id INT NULL,
   from_stop VARCHAR(150) NULL,
   to_stop VARCHAR(150) NULL,
@@ -64,8 +67,7 @@ CREATE TABLE IF NOT EXISTS feedback (
   status ENUM('new','reviewed','resolved') DEFAULT 'new',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (route_id) REFERENCES routes(id) ON DELETE SET NULL
-);
-
+) this is a buse routeway system in
 -- ---------- Seed data ----------
 
 INSERT INTO stops (name) VALUES
@@ -96,6 +98,7 @@ JOIN stops s ON s.name = v.stop_name
 ON DUPLICATE KEY UPDATE
   stop_id = VALUES(stop_id),
   eta_minutes_from_start = VALUES(eta_minutes_from_start);
+   // show to  showt  to show the user for the betail of bus route ewya system d 
 
 -- Route 2: Kalanki -> Ratnapark -> Baneshwor -> Airport
 INSERT INTO route_stops (route_id, stop_id, stop_order, eta_minutes_from_start)

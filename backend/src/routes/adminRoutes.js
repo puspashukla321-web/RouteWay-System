@@ -230,4 +230,124 @@ router.patch("/feedback/:id", async (req, res) => {
   res.json({ message: "Feedback updated." });
 });
 
+/* ============ BUS MANAGEMENT (GPS Tracking) ============ */
+
+// GET /api/admin/buses - List all buses on a route
+router.get("/buses", async (req, res) => {
+  const { routeId } = req.query;
+  
+  if (!routeId) {
+    // Get all buses across all routes
+    const [buses] = await pool.query(`
+      SELECT DISTINCT 
+        bl.bus_id,
+        bl.route_id,
+        r.name AS route_name,
+        r.vehicle_name,
+        bl.latitude,
+        bl.longitude,
+        bl.speed_kmh,
+        bl.updated_at
+      FROM bus_locations bl
+      JOIN routes r ON r.id = bl.route_id
+      WHERE bl.updated_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+      ORDER BY r.id, bl.updated_at DESC
+    `);
+    return res.json({ buses });
+  }
+
+  // Get buses for specific route
+  const [buses] = await pool.query(`
+    SELECT 
+      bl.bus_id,
+      bl.route_id,
+      bl.latitude,
+      bl.longitude,
+      bl.speed_kmh,
+      bl.heading,
+      bl.updated_at
+    FROM bus_locations bl
+    WHERE bl.route_id = ?
+    AND bl.updated_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+    ORDER BY bl.updated_at DESC
+  `, [routeId]);
+  
+  res.json({ route_id: routeId, buses });
+});
+
+// POST /api/admin/buses - Register/add a new bus to a route
+router.post("/buses", async (req, res) => {
+  const { route_id, bus_id, start_latitude, start_longitude } = req.body;
+  
+  if (!route_id || !bus_id) {
+    return res.status(400).json({ 
+      error: "route_id and bus_id are required" 
+    });
+  }
+
+  try {
+    // Check if route exists
+    const [[route]] = await pool.query("SELECT id FROM routes WHERE id = ?", [route_id]);
+    if (!route) {
+      return res.status(404).json({ error: "Route not found" });
+    }
+
+    // Get first stop coordinates if not provided
+    let latitude = start_latitude;
+    let longitude = start_longitude;
+    
+    if (!latitude || !longitude) {
+      const [[firstStop]] = await pool.query(`
+        SELECT s.latitude, s.longitude
+        FROM route_stops rs
+        JOIN stops s ON s.id = rs.stop_id
+        WHERE rs.route_id = ?
+        ORDER BY rs.stop_order ASC
+        LIMIT 1
+      `, [route_id]);
+      
+      if (firstStop) {
+        latitude = firstStop.latitude;
+        longitude = firstStop.longitude;
+      }
+    }
+
+    const [result] = await pool.query(`
+      INSERT INTO bus_locations (route_id, bus_id, latitude, longitude, speed_kmh)
+      VALUES (?, ?, ?, ?, 0)
+      ON DUPLICATE KEY UPDATE
+        updated_at = CURRENT_TIMESTAMP
+    `, [route_id, bus_id, latitude || 0, longitude || 0]);
+
+    res.status(201).json({ 
+      message: "Bus registered",
+      bus_id,
+      route_id
+    });
+  } catch (err) {
+    console.error("Error registering bus:", err);
+    res.status(500).json({ error: "Failed to register bus" });
+  }
+});
+
+// DELETE /api/admin/buses/:bus_id - Remove a bus
+router.delete("/buses/:bus_id", async (req, res) => {
+  try {
+    const { route_id } = req.query;
+    
+    if (!route_id) {
+      return res.status(400).json({ error: "route_id query param required" });
+    }
+
+    await pool.query(`
+      DELETE FROM bus_locations 
+      WHERE bus_id = ? AND route_id = ?
+    `, [req.params.bus_id, route_id]);
+
+    res.json({ message: "Bus removed" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to remove bus" });
+  }
+});
+
 module.exports = router;

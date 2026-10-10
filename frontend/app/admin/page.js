@@ -28,10 +28,14 @@ export default function AdminLoginPage() {
     }
   }
 
+  function goHome() {
+    router.push("/");
+  }
+
   return (
     <div className="page">
       <header className="topbar">
-        <div className="brand">
+        <div className="brand" onClick={goHome} style={{ cursor: "pointer" }}>
           <span className="brand-mark">R</span>
           RouteWay
         </div>

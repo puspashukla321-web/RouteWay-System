@@ -6,6 +6,7 @@ const cors = require("cors");
 const { bootstrapDatabase } = require("./config/bootstrapDb");
 const searchRoutes = require("./routes/search");
 const feedbackRoutes = require("./routes/feedback");
+const trackingRoutes = require("./routes/tracking");
 const adminAuthRoutes = require("./routes/adminAuth");
 const adminRoutes = require("./routes/adminRoutes");
 
@@ -19,10 +20,12 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 // Commuter-facing
 app.use("/api/search", searchRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use("/api/tracking", trackingRoutes); // Public GPS tracking for users
 
 // Admin-facing
 app.use("/api/admin", adminAuthRoutes); // /api/admin/login (public)
 app.use("/api/admin", adminRoutes); // everything else (protected)
+app.use("/api/admin/tracking", trackingRoutes); // Admin GPS management
 
 app.use((req, res) => res.status(404).json({ error: "Not found." }));
 

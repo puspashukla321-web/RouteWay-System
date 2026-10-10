@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "../lib/api";
 import ThemeToggle from "../components/ThemeToggle";
 import RouteScene from "../components/RouteScene";
 
 export default function HomePage() {
+  const router = useRouter();
   const [stops, setStops] = useState([]);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -78,15 +80,22 @@ export default function HomePage() {
     setResultsOpen(false);
   }
 
+  function goHome() {
+    router.push("/");
+  }
+
   return (
     <div className="page">
       <header className="topbar">
-        <div className="brand">
+        <div className="brand" onClick={goHome} style={{ cursor: "pointer" }}>
           <span className="brand-mark">R</span>
           RouteWay
         </div>
         <div className="topbar-actions">
           <ThemeToggle />
+          <a className="nav-link" href="/feedback" title="Send feedback">
+            Feedback
+          </a>
           <a className="nav-link" href="/admin">
             Admin
           </a>
@@ -311,6 +320,7 @@ export default function HomePage() {
 }
 
 function RouteCard({ route, from, to }) {
+  const router = useRouter();
   const [showFeedback, setShowFeedback] = useState(false);
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
@@ -330,6 +340,10 @@ function RouteCard({ route, from, to }) {
     } catch {
       // fail quietly in the card, feedback isn't critical path
     }
+  }
+
+  function trackRoute() {
+    router.push(`/tracking/${route.routeId}`);
   }
 
   return (
@@ -388,6 +402,26 @@ function RouteCard({ route, from, to }) {
             <span className="stop-label">{stop}</span>
           </div>
         ))}
+      </div>
+
+      <div style={{ display: "flex", gap: "10px", marginBottom: "12px" }}>
+        <button
+          className="feedback-toggle"
+          onClick={trackRoute}
+          style={{
+            flex: 1,
+            padding: "8px 12px",
+            backgroundColor: "#0066cc",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "500",
+          }}
+        >
+          📍 Track This Route
+        </button>
       </div>
 
       {!sent ? (

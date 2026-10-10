@@ -1,7 +1,7 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
 
 async function request(path, { method = 'GET', body, token } = {}) {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
@@ -37,3 +37,4 @@ export const api = {
   updateFeedbackStatus: (token, id, status) =>
     request(`/admin/feedback/${id}`, { method: 'PATCH', body: { status }, token }),
 };
+
